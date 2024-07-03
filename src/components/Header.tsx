@@ -1,19 +1,28 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, ChangeEvent } from "react";
 import { NavLink, useLocation } from "react-router-dom"
 import { useAppStore } from "../stores/useAppStore";
 
 export default function Header() {
 
+  const [searchFilters, setSearchFilters] = useState({
+    ingredient: '',
+    category: ''
+  })
   const {pathname} = useLocation();
-  
   const isHome = useMemo( () => pathname === '/', [pathname]);
-  // console.log(isHome);  
-
   const fetchCategories = useAppStore(state => state.fetchCategories)
+  const categories = useAppStore( state => state.categories.drinks);
 
   useEffect( () => {
     fetchCategories();
   } )
+
+  const handleChange = ( e : ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
+      setSearchFilters({
+        ...searchFilters,
+        [e.target.name] : e.target.value
+      })
+  }
 
   return (
     <header className={ isHome ? 'bg-header bg-center bg-cover' : 'bg-slate-800'}>
@@ -57,6 +66,8 @@ export default function Header() {
                       name="ingredient"
                       className="p-3 w-full rounded-lg focus:outline-none" 
                       placeholder="Nombre o ingrediente. Ej. Vodka, Tequila, Coffee"
+                      onChange={ handleChange }
+                      value={ searchFilters.ingredient}
                     />
                   </div>
 
@@ -71,8 +82,15 @@ export default function Header() {
                       id="category"
                       name="category"
                       className="p-3 w-full rounded-lg focus:outline-none" 
+                      onChange={ handleChange }
+                      value={ searchFilters.category}
                     >
                       <option value=''>-- Seleccione ---</option>
+                      {categories.map(category => (
+                        <option key={category.strCategory} value={category.strCategory}>
+                          {category.strCategory}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
