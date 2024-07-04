@@ -2,6 +2,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { useAppStore } from '../stores/useAppStore';
+import { Recipie } from '../types';
 
 export default function Modal() {
   
@@ -9,6 +10,28 @@ export default function Modal() {
     const modal = useAppStore( state => state.modal);
     const closeModal = useAppStore( state => state.closeModal);
     const selectedRecipie = useAppStore( state => state.selectedRecipie);
+    const handleClickFavorite = useAppStore( state => state.handleClickFavorite);
+    const favoriteExist = useAppStore( state => state.favoriteExist);
+
+    const renderIngredients = () => {
+
+      const ingredients : JSX.Element[] = [];
+
+      for( let i = 1 ; i <=6 ; i++ ) {
+        const ingredient = selectedRecipie[`strIngredient${i}` as keyof Recipie];
+        const measure = selectedRecipie[`strMeasure${i}` as keyof Recipie];
+
+        if ( ingredient && measure) {
+          ingredients.push (
+            <li key={i} className='font-normal text-lg'>
+              {ingredient} - {measure}
+            </li>
+          )
+        }
+      }
+      
+      return ingredients;
+    }
 
   return (
     <>
@@ -51,11 +74,37 @@ export default function Modal() {
                   <Dialog.Title as="h3" className="text-gray-900 text-2xl font-extrabold my-5">
                     Ingredientes y Cantidades
                   </Dialog.Title>
+
+                  <div className='ml-5'>
+                    {renderIngredients()}
+                  </div>
+
                   <Dialog.Title as="h3" className="text-gray-900 text-2xl font-extrabold my-5">
                     Instrucciones
                   </Dialog.Title>
 
                     <p className='text-lg'>{selectedRecipie.strInstructions}</p>
+
+                    <div className='mt-5 flex justify-between gap-4'>
+                      <button
+                        type="button"
+                        onClick={closeModal}
+                        className='w-full bg-gray-600 p-3 font-bold uppercase text-white shadow hover:bg-gray-500'
+                      >
+                        Cerrar
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleClickFavorite(selectedRecipie)
+                          closeModal()
+                        }}
+                        className='w-full bg-orange-600 p-3 font-bold uppercase text-white shadow hover:bg-orange-500'
+                      >
+                        {favoriteExist(selectedRecipie.idDrink) ? 'Eliminar Favoritos' : 'Agregar favoritos'}
+                      </button>
+                    </div>
 
                 </Dialog.Panel>
               </Transition.Child>
